@@ -69,7 +69,7 @@ const (
 
 // Inputs ...
 type Inputs struct {
-	ExportMethod               string `env:"distribution_method,opt[app-store,ad-hoc,enterprise,development]"`
+	ExportMethod               string `env:"distribution_method,opt[app-store,ad-hoc,enterprise,development,testflight-internal-only]"`
 	UploadBitcode              bool   `env:"upload_bitcode,opt[yes,no]"`
 	CompileBitcode             bool   `env:"compile_bitcode,opt[yes,no]"`
 	ICloudContainerEnvironment string `env:"icloud_container_environment"`
