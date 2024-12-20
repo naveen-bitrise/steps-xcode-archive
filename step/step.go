@@ -1033,7 +1033,7 @@ func (s XcodebuildArchiver) xcodeIPAExport(opts xcodeIPAExportOpts) (xcodeIPAExp
 		s.logger.Println()
 		s.logger.Printf("generated export options content:")
 		s.logger.Println()
-		s.logger.Printf(exportOptions.String())
+		//s.logger.Printf(exportOptions.String())
 
 		xmlContent := exportOptions.String()
 
@@ -1064,11 +1064,13 @@ func (s XcodebuildArchiver) xcodeIPAExport(opts xcodeIPAExportOpts) (xcodeIPAExp
 		// Assign the modified XML to a variable
 		modifiedXMLString := buffer.String()
 
+		s.logger.Printf(modifiedXMLString)
+
 		if err := os.WriteFile(exportOptionsPath, []byte(modifiedXMLString), 0644){
 			return out, err
 		}
 			
-
+		s.logger.Printf("exportOptions File writter")
 
 		/* if err := exportOptions.WriteToFile(exportOptionsPath); err != nil {
 			return out, err
