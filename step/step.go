@@ -42,7 +42,6 @@ import (
 
 	"bytes"
     	"encoding/xml"
-    	"fmt"
 )
 
 const (
@@ -145,6 +144,12 @@ func NewXcodebuildArchiver(xcodeVersionProvider XcodeVersionProvider, stepInputP
 		logger:               logger,
 		cmdFactory:           cmdFactory,
 	}
+}
+
+type Plist struct {
+    XMLName xml.Name `xml:"plist"`
+    Version string   `xml:"version,attr"`
+    Dict    Dict     `xml:"dict"`
 }
 
 type Dict struct {
@@ -1035,7 +1040,10 @@ func (s XcodebuildArchiver) xcodeIPAExport(opts xcodeIPAExportOpts) (xcodeIPAExp
 		s.logger.Println()
 		//s.logger.Printf(exportOptions.String())
 
-		xmlContent := exportOptions.String()
+		xmlConten, err := t := exportOptions.String()
+		if err != nil {
+			return out, err
+		}
 
 		// Parse the XML
 		var plist Plist
