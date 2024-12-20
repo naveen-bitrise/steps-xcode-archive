@@ -1039,7 +1039,9 @@ func (s XcodebuildArchiver) xcodeIPAExport(opts xcodeIPAExportOpts) (xcodeIPAExp
 
 		// Parse the XML
 		var plist Plist
-		if err := xml.Unmarshal([]byte(xmlContent), &plist){
+		err := xml.Unmarshal([]byte(xmlContent), &plist)
+		
+		if err != nil {
 			return out, err
 		}
 		
@@ -1066,7 +1068,8 @@ func (s XcodebuildArchiver) xcodeIPAExport(opts xcodeIPAExportOpts) (xcodeIPAExp
 
 		s.logger.Printf(modifiedXMLString)
 
-		if err := os.WriteFile(exportOptionsPath, []byte(modifiedXMLString), 0644){
+		err := os.WriteFile(exportOptionsPath, []byte(modifiedXMLString), 0644)
+		if err {
 			return out, err
 		}
 			
