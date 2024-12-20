@@ -1040,7 +1040,7 @@ func (s XcodebuildArchiver) xcodeIPAExport(opts xcodeIPAExportOpts) (xcodeIPAExp
 		s.logger.Println()
 		//s.logger.Printf(exportOptions.String())
 
-		xmlConten, err := t := exportOptions.String()
+		xmlContent, err := exportOptions.String()
 		if err != nil {
 			return out, err
 		}
