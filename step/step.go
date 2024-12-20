@@ -39,6 +39,10 @@ import (
 	"github.com/bitrise-io/go-xcode/xcodebuild"
 	"github.com/kballard/go-shellquote"
 	"howett.net/plist"
+
+	"bytes"
+    	"encoding/xml"
+    	"fmt"
 )
 
 const (
@@ -141,6 +145,16 @@ func NewXcodebuildArchiver(xcodeVersionProvider XcodeVersionProvider, stepInputP
 		logger:               logger,
 		cmdFactory:           cmdFactory,
 	}
+}
+
+type Dict struct {
+    Items []Item `xml:",any"`
+}
+
+type Item struct {
+    XMLName xml.Name
+    Key     string `xml:"key"`
+    Value   string `xml:",chardata"`
 }
 
 // ProcessInputs ...
@@ -1021,9 +1035,44 @@ func (s XcodebuildArchiver) xcodeIPAExport(opts xcodeIPAExportOpts) (xcodeIPAExp
 		s.logger.Println()
 		s.logger.Printf(exportOptions.String())
 
-		if err := exportOptions.WriteToFile(exportOptionsPath); err != nil {
+		xmlContent := exportOptions.String()
+
+		// Parse the XML
+		var plist Plist
+		if err := xml.Unmarshal([]byte(xmlContent), &plist){
 			return out, err
 		}
+		
+		// Add new key-value pair
+		plist.Dict.Items = append(plist.Dict.Items, Item{XMLName: xml.Name{Local: "key"}, Key: "testFlightInternalTestingOnly"})
+		plist.Dict.Items = append(plist.Dict.Items, Item{XMLName: xml.Name{Local: "true"}})
+		
+		// Marshal back to XML
+		output, err := xml.MarshalIndent(plist, "", "    ")
+		if err {
+			return out, err
+		}
+		
+		// Add XML header and DOCTYPE
+		var buffer bytes.Buffer
+		buffer.WriteString(`<?xml version="1.0" encoding="UTF-8"?>`)
+		buffer.WriteString("\n")
+		buffer.WriteString(`<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">`)
+		buffer.WriteString("\n")
+		buffer.Write(output)
+		
+		// Assign the modified XML to a variable
+		modifiedXMLString := buffer.String()
+
+		if err := os.WriteFile(exportOptionsPath, []byte(modifiedXMLString), 0644){
+			return out, err
+		}
+			
+
+
+		/* if err := exportOptions.WriteToFile(exportOptionsPath); err != nil {
+			return out, err
+		}*/
 	}
 
 	ipaExportDir := filepath.Join(tmpDir, "exported")
