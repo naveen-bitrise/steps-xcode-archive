@@ -97,7 +97,7 @@ func (p *ProjectHelper) ArchivableTargetBundleIDToEntitlements() (map[string]aut
 	entitlementsByBundleID := map[string]autocodesign.Entitlements{}
 
 	for _, target := range p.ArchivableTargets() {
-		bundleID, err := p.TargetBundleID(target.Name, p.Configuration, p.customOptions)
+		bundleID, err := p.TargetBundleID(target.Name, p.Configuration)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get target (%s) bundle id: %s", target.Name, err)
 		}
