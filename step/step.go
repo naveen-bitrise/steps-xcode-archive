@@ -754,6 +754,7 @@ func (s XcodebuildArchiver) createCodesignManager(config Config) (codesign.Manag
 		ProjectOrWorkspacePath: config.ProjectPath,
 		SchemeName:             config.Scheme,
 		ConfigurationName:      config.Configuration,
+		AdditionalOptions:      config.XcodebuildAdditionalOptions,
 	})
 	if err != nil {
 		return codesign.Manager{}, err

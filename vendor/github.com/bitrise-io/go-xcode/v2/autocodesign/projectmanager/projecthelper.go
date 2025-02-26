@@ -22,11 +22,12 @@ import (
 
 // ProjectHelper ...
 type ProjectHelper struct {
-	MainTarget       xcodeproj.Target
-	DependentTargets []xcodeproj.Target
-	UITestTargets    []xcodeproj.Target
-	XcProj           xcodeproj.XcodeProj
-	Configuration    string
+	MainTarget        xcodeproj.Target
+	DependentTargets  []xcodeproj.Target
+	UITestTargets     []xcodeproj.Target
+	XcProj            xcodeproj.XcodeProj
+	Configuration     string
+	AdditionalOptions []string
 
 	buildSettingsCache map[string]map[string]serialized.Object // target/config/buildSettings(serialized.Object)
 }
@@ -34,7 +35,7 @@ type ProjectHelper struct {
 // NewProjectHelper checks the provided project or workspace and generate a ProjectHelper with the provided scheme and configuration
 // Previously in the ruby version the initialize method did the same
 // It returns a new ProjectHelper, whose Configuration field contains is the selected configuration (even when configurationName parameter is empty)
-func NewProjectHelper(projOrWSPath, schemeName, configurationName string) (*ProjectHelper, error) {
+func NewProjectHelper(projOrWSPath, schemeName, configurationName string, additionalOptions []string) (*ProjectHelper, error) {
 	if exits, err := pathutil.IsPathExists(projOrWSPath); err != nil {
 		return nil, err
 	} else if !exits {
@@ -77,11 +78,12 @@ func NewProjectHelper(projOrWSPath, schemeName, configurationName string) (*Proj
 	}
 
 	return &ProjectHelper{
-		MainTarget:       mainTarget,
-		DependentTargets: dependentTargets,
-		UITestTargets:    uiTestTargets,
-		XcProj:           xcproj,
-		Configuration:    conf,
+		MainTarget:        mainTarget,
+		DependentTargets:  dependentTargets,
+		UITestTargets:     uiTestTargets,
+		XcProj:            xcproj,
+		Configuration:     conf,
+		AdditionalOptions: additionalOptions,
 	}, nil
 }
 
@@ -95,7 +97,7 @@ func (p *ProjectHelper) ArchivableTargetBundleIDToEntitlements() (map[string]aut
 	entitlementsByBundleID := map[string]autocodesign.Entitlements{}
 
 	for _, target := range p.ArchivableTargets() {
-		bundleID, err := p.TargetBundleID(target.Name, p.Configuration)
+		bundleID, err := p.TargetBundleID(target.Name, p.Configuration, p.customOptions)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get target (%s) bundle id: %s", target.Name, err)
 		}
@@ -224,7 +226,7 @@ func (p *ProjectHelper) targetBuildSettings(name, conf string) (serialized.Objec
 		}
 	}
 
-	settings, err := p.XcProj.TargetBuildSettings(name, conf)
+	settings, err := p.XcProj.TargetBuildSettings(name, conf, p.AdditionalOptions...)
 	if err != nil {
 		return nil, err
 	}
